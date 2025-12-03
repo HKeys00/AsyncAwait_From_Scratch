@@ -46,6 +46,7 @@ namespace AsyncAwait_From_Scratch
                 {
                     thread = new CustomThread(ThreadClearOfWork);
                     thread.SetTask(_queue.Dequeue());
+                    _pool.Add(thread);
                 }
 
                 return;

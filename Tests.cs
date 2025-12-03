@@ -17,11 +17,12 @@ namespace AsyncAwait_From_Scratch
         /// </summary>
         public static void Test1()
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
+                int index = i;
                 CustomThreadPool.QueueThreadWorkItem(() =>
                 {
-                    Console.WriteLine(i);
+                    Console.WriteLine(index);
                     Thread.Sleep(1000);
                 });
             }
