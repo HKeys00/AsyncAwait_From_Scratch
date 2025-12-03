@@ -31,15 +31,21 @@
                         _isRunning = true;
                         _action();
                     }
-                    
+
                     _completeCallback();
                     _action = null;
                     _isRunning = false;
                 }
             });
+
+            _thread.Start();
         }
 
-        public void SetTask(Action action) => _action = action;
+        public void SetTask(Action action)
+        {
+            _action = action;
+            _signal.Set();
+        }
 
     }
 }

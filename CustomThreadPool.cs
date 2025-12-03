@@ -26,26 +26,32 @@ namespace AsyncAwait_From_Scratch
 
         public static void QueueThreadWorkItem(Action action)
         {
-            if (_queue.Count > _pool.Count)
-            {
-                if (_pool.Count <= MaxThreadCount) 
-                {
-                    var thread = new CustomThread(ThreadClearOfWork);
-                    thread.SetTask(action);
-                }
-
-
-            if (_queue.Count > _pool.Count)
-            {
-                _queue.Enqueue(action);
-            }
-            
-            
+            _queue.Enqueue(action);
+            RunWorkItemOnThread();
         }
 
         private static void ThreadClearOfWork()
         {
+            if (_queue.Count > 0)
+            {
+                RunWorkItemOnThread();
+            }
+        }
 
+        private static void RunWorkItemOnThread() {
+            var thread = _pool.FirstOrDefault(t => !t.IsRunning);
+            if (thread == null)
+            {
+                if (_pool.Count <= MaxThreadCount)
+                {
+                    thread = new CustomThread(ThreadClearOfWork);
+                    thread.SetTask(_queue.Dequeue());
+                }
+
+                return;
+            }
+
+            thread.SetTask(_queue.Dequeue());
         }
     }
 }
