@@ -28,7 +28,7 @@ namespace AsyncAwait_From_Scratch
         {
             if (_queue.Count > _pool.Count)
             {
-                if (_pool.Count <= MaxThreadCount)
+                if (_pool.Count <= MaxThreadCount) 
                 {
                     var thread = new CustomThread(ThreadClearOfWork);
                     thread.SetTask(action);
