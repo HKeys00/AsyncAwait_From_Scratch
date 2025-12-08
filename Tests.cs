@@ -20,6 +20,11 @@ namespace AsyncAwait_From_Scratch
             for (int i = 0; i < 100; i++)
             {
                 int index = i;
+                //ThreadPool.QueueUserWorkItem(delegate
+                //{
+                //    Console.WriteLine(index);
+                //    Thread.Sleep(1000);
+                //});
                 CustomThreadPool.QueueThreadWorkItem(() =>
                 {
                     Console.WriteLine(index);

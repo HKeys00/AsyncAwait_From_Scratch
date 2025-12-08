@@ -6,7 +6,6 @@
 
         private Thread _thread;
         private Action? _action;
-        private Action _completeCallback;
 
         private bool _isRunning;
 
@@ -15,11 +14,9 @@
             get { return _isRunning; }
         }
 
-        public CustomThread(Action completeCallback)
+        public CustomThread()
         {
             _isRunning = false;
-            _completeCallback = completeCallback;
-
             _signal = new AutoResetEvent(false);
             _thread = new Thread(() =>
             {
@@ -32,7 +29,6 @@
                         _action();
                     }
 
-                    _completeCallback();
                     _action = null;
                     _isRunning = false;
                 }
