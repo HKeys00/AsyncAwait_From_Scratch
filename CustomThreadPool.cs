@@ -10,7 +10,7 @@ namespace AsyncAwait_From_Scratch
     public static class CustomThreadPool
     {
         private static readonly int MaxThreadCount = Environment.ProcessorCount;
-        private static readonly BlockingCollection<(Action, string?)> _queue = new BlockingCollection<(Action, string?)>();
+        private static readonly BlockingCollection<(Action, ExecutionContext?)> _queue = new BlockingCollection<(Action, ExecutionContext?)>();
         private static readonly ConcurrentBag<CustomThread> _pool = new ConcurrentBag<CustomThread>();
 
         static CustomThreadPool()
@@ -21,9 +21,9 @@ namespace AsyncAwait_From_Scratch
             }
         }
 
-        public static void QueueThreadWorkItem(Action action, string contextKey)
+        public static void QueueThreadWorkItem(Action action)
         {
-            _queue.Add(action);
+            _queue.Add((action, ExecutionContext.Capture()));
         }
     }
 }

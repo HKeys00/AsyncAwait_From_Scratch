@@ -6,21 +6,28 @@ namespace AsyncAwait_From_Scratch
     {
         private Thread _thread;
         private Action? _action;
-        private string? _contextKey;
+        private ExecutionContext? _context;
 
-        private BlockingCollection<(Action, string?)> _collection;
+        private BlockingCollection<(Action, ExecutionContext?)> _collection;
 
-        public CustomThread(BlockingCollection<(Action, string?)> collection)
+        public CustomThread(BlockingCollection<(Action, ExecutionContext?)> collection)
         {
             _collection = collection;
             _thread = new Thread(() =>
             {
                 while (true)
                 {
-                    (_action, _contextKey) = _collection.Take();
+                    (_action, _context) = _collection.Take();
                     if (_action != null)
                     {
-                        _action();
+                        if (_context == null)
+                        {
+                            _action();
+                        } else
+                        {
+                            ExecutionContext.Run(_context, state => ((Action)state!).Invoke(), _action);
+                        }
+                        
                     }
 
                     _action = null;

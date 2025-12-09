@@ -17,12 +17,13 @@ namespace AsyncAwait_From_Scratch
         /// </summary>
         public static void Test1()
         {
+            AsyncLocal<int> value = new AsyncLocal<int>();
             for (int i = 0; i < 100; i++)
             {
-                int index = i;
+                value.Value = i;
                 CustomThreadPool.QueueThreadWorkItem(() =>
                 {
-                    Console.WriteLine(index);
+                    Console.WriteLine(value.Value);
                     Thread.Sleep(1000);
                 });
             }
