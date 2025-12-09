@@ -1,47 +1,33 @@
-﻿namespace AsyncAwait_From_Scratch
+﻿using System.Collections.Concurrent;
+
+namespace AsyncAwait_From_Scratch
 {
     public class CustomThread
     {
-        private AutoResetEvent _signal;
-
         private Thread _thread;
         private Action? _action;
+        private string? _contextKey;
 
-        private bool _isRunning;
+        private BlockingCollection<(Action, string?)> _collection;
 
-        public bool IsRunning
+        public CustomThread(BlockingCollection<(Action, string?)> collection)
         {
-            get { return _isRunning; }
-        }
-
-        public CustomThread()
-        {
-            _isRunning = false;
-            _signal = new AutoResetEvent(false);
+            _collection = collection;
             _thread = new Thread(() =>
             {
                 while (true)
                 {
-                    _signal.WaitOne();
+                    (_action, _contextKey) = _collection.Take();
                     if (_action != null)
                     {
-                        _isRunning = true;
                         _action();
                     }
 
                     _action = null;
-                    _isRunning = false;
                 }
             });
-
+            _thread.IsBackground = true;
             _thread.Start();
         }
-
-        public void SetTask(Action action)
-        {
-            _action = action;
-            _signal.Set();
-        }
-
     }
 }
