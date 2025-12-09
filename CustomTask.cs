@@ -105,10 +105,27 @@
             }
         }
 
-        //public CustomTask Run()
-        //{
+        public static CustomTask Run(Action action)
+        {
+            var task = new CustomTask();
+            CustomThreadPool.QueueThreadWorkItem(() =>
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    task.SetException(ex);
+                    return;
+                }
+                     
+                task.SetResult();
+            });
 
-        //}
+
+            return task;
+        }
 
         //public CustomTask WhenAll()
         //{

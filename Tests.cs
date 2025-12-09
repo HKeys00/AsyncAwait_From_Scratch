@@ -29,6 +29,27 @@ namespace AsyncAwait_From_Scratch
             }
         }
 
+        /// <summary>
+        /// Second test to see if task.run and task.wait functionality has been added properly
+        /// </summary>
+        public static void Test2()
+        {
+            AsyncLocal<int> value = new AsyncLocal<int>();
+            List<CustomTask> tasks = new List<CustomTask>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                value.Value = i;
+                tasks.Add(CustomTask.Run(() =>
+                {
+                    Console.WriteLine(value.Value);
+                    Thread.Sleep(1000);
+                }));
+            }
+
+            foreach (var t in tasks) t.Wait();
+        }
+
         //SAMPLE CODE THAT NEEDS TO RUN 
         //for (int i = 0; ; i++) #4
         //{

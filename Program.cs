@@ -3,7 +3,6 @@ using AsyncAwait_From_Scratch;
 
 Console.WriteLine("Hello, World!");
 
-Tests.Test1();
-
-Console.ReadLine();
+//Tests.Test1();
+Tests.Test2();
 
