@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,47 +48,73 @@ namespace AsyncAwait_From_Scratch
                 }));
             }
 
-            foreach (var t in tasks) t.Wait();
+            foreach (var t in tasks) {
+                Console.WriteLine("Waiting");
+                t.Wait();
+            }
         }
 
-        //SAMPLE CODE THAT NEEDS TO RUN 
-        //for (int i = 0; ; i++) #4
-        //{
-        //    MyTask.Delay(1000)
-        //    Console.WriteLine(i)
-        //}
-        // tip - needs an iterate method that uses an IEnumerable<myTask>
+        /// <summary>
+        /// Third test to test the when all functionality.
+        /// </summary>
+        public static void Test3()
+        {
+            AsyncLocal<int> value = new AsyncLocal<int>();
+            List<CustomTask> tasks = new List<CustomTask>();
 
-        //Console.Write("Hello, "); #3
-        //MyTask.Delay(2000).ContinueWith(delegate
-        //{
-        //    Console.Write("World!");
-        //    return MyTask.Delay(2000);
-        //}).ConiuteWith(delegate
-        //{
-        //    Console.Write(" How are you?")
-        //}).Wait();
-        // Project should not exit utni lhow are you is printed
+            for (int i = 0; i < 100; i++)
+            {
+                value.Value = i;
+                tasks.Add(CustomTask.Run(() =>
+                {
+                    Console.WriteLine(value.Value);
+                    Thread.Sleep(1000);
+                }));
+            }
 
-        //List<MyTask> tasks = new() #2
-        //for (int i = 0; i < 100; i++)
-        //{
-        //tasks.Add(MyTask.run(delegate
-        //{
-        //    Console.WriteLine(i);
-        //    Thread.Sleep(1000);
-        //})
-        //}
-        // MyTask.WhenAll(tasks).Wait()
-        // This code won't work initally 
+            CustomTask.WhenAll(tasks).Wait();
+        }
 
-        //for (int i = 0; i < 1000; i++) #1
-        //{ 
-        //    //Queue Thread Work (() => {
-        //    //console.writeLine(i);
-        //    //thead.sleep()
-        //    //});
-        //}
-        //Won't work initially
+        /// <summary>
+        /// 4th test to test delay functionality.
+        /// </summary>
+        public static void Test4()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                Console.WriteLine(i);
+                CustomTask.Delay(1000).Wait();
+            }
+        }
+
+        /// <summary>
+        /// 5th test to add compostability to ContinueWith;
+        /// </summary>
+        public static void Test5()
+        {
+            Console.Write("Hello, ");
+            CustomTask.Delay(2000).ContinueWith(() =>
+            {
+            }).ContinueWith(() =>
+            {
+                Console.Write("World!");
+            }).Wait();
+        }
+
+        /// <summary>
+        /// Testing the functionality of looping Task.Delays by implementing an iterator.
+        /// </summary>
+        public static void Test6()
+        {
+            CustomTask.Iterate(PrintAsync()).Wait();
+            static IEnumerable<CustomTask> PrintAsync()
+            {
+                for (int i = 0; ; i++)
+                {
+                    yield return CustomTask.Delay(1000);
+                    Console.WriteLine(i);
+                }
+            }
+        }
     }
 }

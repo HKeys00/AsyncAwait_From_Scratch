@@ -5,8 +5,6 @@ namespace AsyncAwait_From_Scratch
     public class CustomThread
     {
         private Thread _thread;
-        private Action? _action;
-        private ExecutionContext? _context;
 
         private BlockingCollection<(Action, ExecutionContext?)> _collection;
 
@@ -17,20 +15,20 @@ namespace AsyncAwait_From_Scratch
             {
                 while (true)
                 {
-                    (_action, _context) = _collection.Take();
-                    if (_action != null)
+                    (var action, var context) = _collection.Take();
+                    if (action != null)
                     {
-                        if (_context == null)
+                        if (context == null)
                         {
-                            _action();
+                            action();
                         } else
                         {
-                            ExecutionContext.Run(_context, state => ((Action)state!).Invoke(), _action);
+                            ExecutionContext.Run(context, state => ((Action)state!).Invoke(), action);
                         }
                         
                     }
 
-                    _action = null;
+                    action = null;
                 }
             });
             _thread.IsBackground = true;

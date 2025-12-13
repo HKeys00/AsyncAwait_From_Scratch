@@ -1,4 +1,6 @@
-﻿namespace AsyncAwait_From_Scratch
+﻿using System.Timers;
+
+namespace AsyncAwait_From_Scratch
 {
 
     // - Implement class MyTask instead of using Task<T>
@@ -81,28 +83,68 @@
             }
         }
 
-        public void ContinueWith(Action action)
+        public CustomTask ContinueWith(Action action)
         {
+            var task = new CustomTask();
             _context = ExecutionContext.Capture();
+
+            Action callback = () =>
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception e)
+                {
+                    task.SetException(e);
+                    return;
+                }
+
+                task.SetResult();
+            };
+
+
             lock (_lock)
             {
                 if (_completed)
                 {
-                    CustomThreadPool.QueueThreadWorkItem(() =>
+                    CustomThreadPool.QueueThreadWorkItem(callback);
+                } else
+                {
+
+                    _continuation = callback;
+                }
+
+            }
+
+            return task;
+        }
+
+        public static CustomTask WhenAll(List<CustomTask> tasks)
+        {
+            var task = new CustomTask();
+
+            if (tasks.Count == 0)
+            {
+                task.SetResult();
+            } 
+            else 
+            {
+                int count = tasks.Count;
+                foreach(var t in tasks)
+                {
+                    t.ContinueWith(() =>
                     {
-                        if (_context == null)
+                        Interlocked.Decrement(ref count);
+                        if (count == 0)
                         {
-                            action(); 
-                        }
-                        else
-                        {
-                            ExecutionContext.Run(_context, state => ((Action)state!).Invoke(), _continuation);
+                            task.SetResult();
                         }
                     });
                 }
-
-                _continuation = action;
             }
+
+            return task;
         }
 
         public static CustomTask Run(Action action)
@@ -127,9 +169,40 @@
             return task;
         }
 
-        //public CustomTask WhenAll()
-        //{
+        public static CustomTask Delay(int timeout)
+        {
+            var task = new CustomTask();
 
-        //}
+            var timer = new System.Timers.Timer(timeout);
+            timer.Elapsed += (s, e) => task.SetResult();
+            timer.AutoReset = false;
+            timer.Start();
+
+            return task;
+        }
+
+        public static CustomTask Iterate(IEnumerable<CustomTask> tasks)
+        {
+            var task = new CustomTask();
+
+            IEnumerator<CustomTask> iter = tasks.GetEnumerator();
+            
+            void MoveNext()
+            {
+                
+                if (iter.MoveNext())
+                {
+                    CustomTask next = iter.Current;
+                    next.ContinueWith(MoveNext);
+                    return;
+                }
+
+                task.SetResult();
+            }
+
+            MoveNext();
+
+            return task;
+        }
     }
 }
